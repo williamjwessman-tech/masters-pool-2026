@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 Masters Pool</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-dark: #1a3a2a;
+    --green-mid: #1e5c38;
+    --green-light: #2d7a4f;
+    --green-pale: #e8f3ec;
+    --gold: #c9a84c;
+    --gold-light: #e8c96b;
+    --gold-pale: #fdf6e3;
+    --cream: #faf8f3;
+    --white: #ffffff;
+    --text-dark: #1a1a1a;
+    --text-mid: #3d3d3d;
+    --text-muted: #7a7a6e;
+    --border: #d4c99a;
+    --border-light: #ece6d0;
+    --cut: #c0392b;
+    --wd: #7f8c8d;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Source Sans 3', sans-serif; background: var(--cream); color: var(--text-dark); min-height: 100vh; }
+
+  /* HEADER */
+  header { background: var(--green-dark); color: var(--cream); text-align: center; padding: 2rem 1rem 1.5rem; border-bottom: 3px solid var(--gold); position: relative; overflow: hidden; }
+  header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(201,168,76,0.03) 20px, rgba(201,168,76,0.03) 40px); pointer-events: none; }
+  .header-logo { font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: var(--gold); margin-bottom: 0.5rem; font-family: 'Source Sans 3', sans-serif; font-weight: 300; }
+  header h1 { font-family: 'Playfair Display', serif; font-size: clamp(1.8rem, 5vw, 3rem); font-weight: 700; color: var(--cream); letter-spacing: 1px; }
+  header h1 span { color: var(--gold); }
+  .header-sub { font-size: 13px; color: rgba(250,248,243,0.65); margin-top: 0.4rem; letter-spacing: 1px; }
+  .last-updated { font-size: 11px; color: var(--gold-light); margin-top: 0.5rem; opacity: 0.8; }
+
+  /* NAV TABS */
+  .tabs { background: var(--green-mid); display: flex; justify-content: center; gap: 0; border-bottom: 2px solid var(--gold); overflow-x: auto; }
+  .tab-btn { padding: 0.85rem 1.5rem; color: rgba(250,248,243,0.7); cursor: pointer; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 500; border: none; background: none; white-space: nowrap; transition: color 0.2s, background 0.2s; font-family: 'Source Sans 3', sans-serif; border-bottom: 3px solid transparent; margin-bottom: -2px; }
+  .tab-btn:hover { color: var(--gold-light); }
+  .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); background: rgba(201,168,76,0.08); }
+
+  /* MAIN CONTENT */
+  main { max-width: 1100px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* STATUS BANNER */
+  .status-banner { background: var(--green-pale); border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem 1rem; display: flex; align-items: center; gap: 0.6rem; font-size: 13px; color: var(--green-mid); margin-bottom: 1.5rem; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green-light); flex-shrink: 0; }
+  .status-dot.live { animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* SECTION TITLES */
+  .section-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.2rem; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--green-dark); }
+  .section-divider { flex: 1; height: 1px; background: var(--border); }
+  .count-badge { font-size: 11px; background: var(--green-dark); color: var(--gold); padding: 2px 8px; border-radius: 10px; font-weight: 500; letter-spacing: 0.5px; }
+
+  /* POOL LEADERBOARD TABLE */
+  .lb-table-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 2px 12px rgba(26,58,42,0.07); }
+  table { width: 100%; border-collapse: collapse; background: var(--white); font-size: 13.5px; }
+  thead tr { background: var(--green-dark); color: var(--cream); }
+  thead th { padding: 0.75rem 0.9rem; text-align: left; font-weight: 500; font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; white-space: nowrap; }
+  thead th.right { text-align: right; }
+  thead th.center { text-align: center; }
+  tbody tr { border-bottom: 1px solid var(--border-light); transition: background 0.15s; }
+  tbody tr:hover { background: var(--gold-pale); }
+  tbody tr.top3 { background: rgba(201,168,76,0.06); }
+  tbody td { padding: 0.65rem 0.9rem; vertical-align: middle; }
+  tbody td.right { text-align: right; font-variant-numeric: tabular-nums; }
+  tbody td.center { text-align: center; }
+  .pos-cell { font-weight: 600; font-size: 14px; color: var(--green-mid); width: 40px; }
+  .pos-medal { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; font-size: 12px; font-weight: 700; }
+  .medal-1 { background: #FFD700; color: #7a5a00; }
+  .medal-2 { background: #C0C0C0; color: #4a4a4a; }
+  .medal-3 { background: #CD7F32; color: #5a3000; }
+  .entrant-name { font-weight: 500; color: var(--text-dark); }
+  .score-total { font-weight: 700; font-size: 15px; }
+  .score-pos { color: var(--cut); }
+  .score-neg { color: var(--green-light); }
+  .score-e { color: var(--text-mid); }
+  .golfer-tag { display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 10px; margin: 1px; white-space: nowrap; }
+  .golfer-active { background: var(--green-pale); color: var(--green-dark); border: 1px solid rgba(46,122,79,0.3); }
+  .golfer-counting { background: rgba(201,168,76,0.15); color: #7a5a00; border: 1px solid rgba(201,168,76,0.4); font-weight: 600; }
+  .golfer-cut { background: #fdecea; color: var(--cut); border: 1px solid rgba(192,57,43,0.2); text-decoration: line-through; }
+  .golfer-wd { background: #f5f5f5; color: var(--wd); border: 1px solid #ddd; text-decoration: line-through; }
+
+  /* SEARCH & FILTER */
+  .controls { display: flex; gap: 0.75rem; margin-bottom: 1.2rem; flex-wrap: wrap; align-items: center; }
+  .search-input { flex: 1; min-width: 180px; padding: 0.55rem 0.9rem; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; font-family: 'Source Sans 3', sans-serif; background: var(--white); color: var(--text-dark); outline: none; }
+  .search-input:focus { border-color: var(--green-mid); box-shadow: 0 0 0 2px rgba(30,92,56,0.12); }
+  .refresh-btn { padding: 0.55rem 1.2rem; background: var(--green-dark); color: var(--gold); border: 1px solid var(--gold); border-radius: 6px; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; font-family: 'Source Sans 3', sans-serif; font-weight: 500; transition: background 0.2s; }
+  .refresh-btn:hover { background: var(--green-mid); }
+
+  /* MASTERS LB */
+  .masters-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0.6rem; }
+  .golfer-card { background: var(--white); border: 1px solid var(--border-light); border-radius: 6px; padding: 0.6rem 0.9rem; display: flex; align-items: center; gap: 0.7rem; }
+  .gc-pos { font-size: 13px; font-weight: 700; color: var(--green-mid); min-width: 32px; }
+  .gc-name { flex: 1; font-size: 14px; font-weight: 500; }
+  .gc-score { font-size: 15px; font-weight: 700; min-width: 48px; text-align: right; }
+  .gc-thru { font-size: 11px; color: var(--text-muted); min-width: 40px; text-align: right; }
+  .gc-cut-line { border-top: 2px dashed var(--cut); padding-top: 0.4rem; margin-top: 0.3rem; }
+  .cut-label { font-size: 11px; color: var(--cut); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; text-align: center; padding: 0.3rem 0; }
+
+  /* ENTRANT DETAIL MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(26,58,42,0.6); z-index: 1000; align-items: center; justify-content: center; padding: 1rem; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--cream); border-radius: 10px; border: 2px solid var(--gold); max-width: 520px; width: 100%; max-height: 90vh; overflow-y: auto; }
+  .modal-header { background: var(--green-dark); color: var(--cream); padding: 1.2rem 1.5rem; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center; }
+  .modal-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; }
+  .modal-score { font-size: 1.4rem; font-weight: 700; color: var(--gold); }
+  .modal-close { background: none; border: none; color: var(--cream); font-size: 1.5rem; cursor: pointer; opacity: 0.7; line-height: 1; padding: 0; }
+  .modal-close:hover { opacity: 1; }
+  .modal-body { padding: 1.2rem 1.5rem; }
+  .modal-scoring-note { font-size: 12px; color: var(--text-muted); margin-bottom: 1rem; font-style: italic; }
+  .pick-row { display: flex; align-items: center; gap: 0.7rem; padding: 0.5rem 0; border-bottom: 1px solid var(--border-light); }
+  .pick-num { font-size: 11px; color: var(--text-muted); min-width: 40px; }
+  .pick-name { flex: 1; font-size: 14px; }
+  .pick-score { font-size: 14px; font-weight: 600; min-width: 48px; text-align: right; }
+  .pick-thru { font-size: 11px; color: var(--text-muted); min-width: 42px; text-align: right; }
+  .pick-counting-badge { font-size: 10px; background: var(--gold); color: var(--green-dark); padding: 1px 6px; border-radius: 8px; font-weight: 700; margin-left: 4px; }
+  .pick-status-cut { font-size: 10px; color: var(--cut); font-weight: 600; }
+  .pick-status-wd { font-size: 10px; color: var(--wd); font-weight: 600; }
+  .modal-total { padding: 1rem 0 0; display: flex; justify-content: space-between; align-items: center; }
+  .modal-total-label { font-weight: 500; font-size: 14px; color: var(--text-muted); }
+  .modal-total-score { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700; }
+
+  /* LOADING / ERROR */
+  .loading-msg { text-align: center; padding: 3rem; color: var(--text-muted); font-size: 15px; }
+  .error-msg { background: #fdecea; border: 1px solid rgba(192,57,43,0.3); border-radius: 6px; padding: 1rem; color: var(--cut); font-size: 14px; margin: 1rem 0; }
+
+  /* FOOTER */
+  footer { text-align: center; padding: 1.5rem; color: var(--text-muted); font-size: 12px; border-top: 1px solid var(--border); margin-top: 2rem; }
+  footer strong { color: var(--green-mid); }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .tab-btn { padding: 0.7rem 0.9rem; font-size: 11px; letter-spacing: 0.8px; }
+    tbody td { padding: 0.5rem 0.6rem; }
+    .picks-col { display: none; }
+  }
+
+  .tiebreak-note { font-size: 11px; color: var(--text-muted); font-style: italic; margin-top: 0.4rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-logo">Augusta National · April 2026</div>
+  <h1>Masters Pool <span>2026</span></h1>
+  <div class="header-sub">97 Entrants · Top 4 of 10 Picks · Ties resolved by 5th pick and beyond</div>
+  <div class="last-updated" id="lastUpdated">Loading scores...</div>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" onclick="showTab('pool')">Pool Leaderboard</button>
+  <button class="tab-btn" onclick="showTab('picks')">Entrant Picks</button>
+  <button class="tab-btn" onclick="showTab('masters')">Masters Leaderboard</button>
+</nav>
+
+<main>
+  <!-- POOL LEADERBOARD TAB -->
+  <div id="tab-pool" class="tab-panel active">
+    <div class="status-banner">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">Fetching live scores from the Masters...</span>
+    </div>
+    <div class="controls">
+      <input class="search-input" type="text" id="poolSearch" placeholder="Search entrant name..." oninput="filterPool()">
+      <button class="refresh-btn" onclick="fetchAndRender()">↻ Refresh</button>
+    </div>
+    <div class="section-header">
+      <span class="section-title">Pool Standings</span>
+      <span class="count-badge" id="poolCountBadge">—</span>
+      <div class="section-divider"></div>
+    </div>
+    <div class="lb-table-wrap">
+      <table id="poolTable">
+        <thead>
+          <tr>
+            <th>Pos</th>
+            <th>Entrant</th>
+            <th class="right">Score</th>
+            <th class="picks-col">Counting Golfers (4 + tiebreakers)</th>
+          </tr>
+        </thead>
+        <tbody id="poolBody">
+          <tr><td colspan="4" class="loading-msg">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="tiebreak-note">† Ties broken by 5th–10th pick scores sequentially. CUT/WD golfers count as last place (worst score in field).</div>
+  </div>
+
+  <!-- ENTRANT PICKS TAB -->
+  <div id="tab-picks" class="tab-panel">
+    <div class="controls">
+      <input class="search-input" type="text" id="picksSearch" placeholder="Search entrant..." oninput="filterPicks()">
+    </div>
+    <div class="section-header">
+      <span class="section-title">All Entrants &amp; Picks</span>
+      <div class="section-divider"></div>
+    </div>
+    <div id="picksGrid" class="loading-msg">Loading...</div>
+  </div>
+
+  <!-- MASTERS LEADERBOARD TAB -->
+  <div id="tab-masters" class="tab-panel">
+    <div class="controls">
+      <input class="search-input" type="text" id="mastersSearch" placeholder="Search golfer..." oninput="filterMasters()">
+      <button class="refresh-btn" onclick="fetchAndRender()">↻ Refresh</button>
+    </div>
+    <div class="section-header">
+      <span class="section-title">Masters Tournament Leaderboard</span>
+      <div class="section-divider"></div>
+    </div>
+    <div id="mastersLB" class="loading-msg">Loading...</div>
+  </div>
+</main>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modalName">—</div>
+        <div style="font-size:12px;color:rgba(250,248,243,0.6);margin-top:2px;">2026 Masters Pool</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:1rem;">
+        <div class="modal-score" id="modalScore">—</div>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-scoring-note">Top 4 scores count. Ties resolved by next-best pick. CUT/WD = last place score.</div>
+      <div id="modalPicks"></div>
+      <div class="modal-total">
+        <div class="modal-total-label">Total Score</div>
+        <div class="modal-total-score" id="modalTotal">—</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <strong>2026 Masters Pool</strong> · Scores via Masters Tournament API · Updates every 5 minutes during play
+</footer>
+
+<script>
+const POOL_DATA = {"entrants":[{"name":"Matt Mitchell","picks":["Rory McIlroy","Cameron Young","Justin Rose","Viktor Hovland","Chris Gotterup","Corey Conners","Cameron Smith","Kurt Kitayama","Brian Harman","Fifa Laopakdee"]},{"name":"Matt Clayton","picks":["Ludvig Åberg","Tommy Fleetwood","Justin Rose","Akshay Bhatia","Sepp Straka","Harris English","Corey Conners","Nicolai Højgaard","Max Homa","Brian Campbell"]},{"name":"Matt Fernandez","picks":["Scottie Scheffler","Matt Fitzpatrick","Jordan Spieth","Justin Thomas","Chris Gotterup","Sungjae Im","Cameron Smith","Max Homa","Corey Conners","Fred Couples"]},{"name":"Josh Cohen","picks":["Bryson DeChambeau","Cameron Young","Matt Fitzpatrick","Akshay Bhatia","Sepp Straka","Sam Burns","Harris English","J.J. Spaun","Nicolai Højgaard","Ethan Fang"]},{"name":"Teddy Lyons 1","picks":["Scottie Scheffler","Tommy Fleetwood","Cameron Young","Akshay Bhatia","Si Woo Kim","J.J. Spaun","Daniel Berger","Rasmus Højgaard","Cameron Smith","Fifa Laopakdee"]},{"name":"Teddy Lyons 2","picks":["Ludvig Åberg","Matt Fitzpatrick","Min Woo Lee","Viktor Hovland","Patrick Cantlay","Harris English","Sam Burns","Wyndham Clark","Brian Harman","Danny Willett"]},{"name":"Charlie Ankeny","picks":["Scottie Scheffler","Tommy Fleetwood","Brooks Koepka","Si Woo Kim","Viktor Hovland","Maverick McNealy","Cameron Smith","Max Homa","Wyndham Clark","Danny Willett"]},{"name":"Rich Fernandez","picks":["Ludvig Åberg","Tommy Fleetwood","Min Woo Lee","Shane Lowry","Patrick Cantlay","Sam Burns","Cameron Smith","Gary Woodland","J.J. Spaun","Angel Cabrera"]},{"name":"Sarah Fernandez","picks":["Bryson DeChambeau","Cameron Young","Collin Morikawa","Viktor Hovland","Si Woo Kim","J.J. Spaun","Max Homa","Wyndham Clark","Bubba Watson","Fred Couples"]},{"name":"Craig Mitchell","picks":["Xander Schauffele","Tommy Fleetwood","Patrick Reed","Viktor Hovland","Akshay Bhatia","J.J. Spaun","Max Homa","Keegan Bradley","Kurt Kitayama","Vijay Singh"]},{"name":"Jonah Katz","picks":["Scottie Scheffler","Matt Fitzpatrick","Tommy Fleetwood","Akshay Bhatia","Jake Knapp","Nicolai Højgaard","Maverick McNealy","Sam Stevens","Corey Conners","Danny Willett"]},{"name":"Jason Marra 1","picks":["Ludvig Åberg","Cameron Young","Collin Morikawa","Si Woo Kim","Viktor Hovland","Gary Woodland","Maverick McNealy","Ben Griffin","Sungjae Im","Danny Willett"]},{"name":"Jason Marra 2","picks":["Scottie Scheffler","Justin Rose","Hideki Matsuyama","Akshay Bhatia","Si Woo Kim","Corey Conners","Cameron Smith","Gary Woodland","Daniel Berger","Danny Willett"]},{"name":"Steve Skramovsky","picks":["Scottie Scheffler","Tommy Fleetwood","Robert MacIntyre","Chris Gotterup","Viktor Hovland","Sungjae Im","J.J. Spaun","Nicolai Højgaard","Gary Woodland","Ethan Fang"]},{"name":"Connor McCarthy","picks":["Scottie Scheffler","Robert MacIntyre","Cameron Young","Akshay Bhatia","Tyrrell Hatton","Sungjae Im","Cameron Smith","Keegan Bradley","Sam Burns","Mason Howell"]},{"name":"Doug Hitchner","picks":["Jon Rahm","Matt Fitzpatrick","Collin Morikawa","Viktor Hovland","Jacob Bridgeman","Sungjae Im","Cameron Smith","Brian Harman","Gary Woodland","Brian Campbell"]},{"name":"Kip Colwell","picks":["Xander Schauffele","Tommy Fleetwood","Justin Rose","Jason Day","Chris Gotterup","J.J. Spaun","Nicolai Højgaard","Gary Woodland","Ryan Fox","Mason Howell"]},{"name":"Michael Zubak 1","picks":["Bryson DeChambeau","Justin Rose","Patrick Reed","Akshay Bhatia","Chris Gotterup","Maverick McNealy","J.J. Spaun","Corey Conners","Nicolai Højgaard","Danny Willett"]},{"name":"Michael Zubak 2","picks":["Jon Rahm","Cameron Young","Patrick Reed","Chris Gotterup","Akshay Bhatia","J.J. Spaun","Corey Conners","Maverick McNealy","Nicolai Højgaard","Danny Willett"]},{"name":"Charlie Mitchell 1","picks":["Bryson DeChambeau","Matt Fitzpatrick","Justin Rose","Chris Gotterup","Adam Scott","Nicolai Højgaard","Ryan Fox","Cameron Smith","J.J. Spaun","Mason Howell"]},{"name":"Charlie Mitchell 2","picks":["Scottie Scheffler","Cameron Young","Tommy Fleetwood","Viktor Hovland","Akshay Bhatia","Sungjae Im","Sam Burns","Harris English","Corey Conners","Mason Howell"]},{"name":"CJ Hassan 1","picks":["Scottie Scheffler","Matt Fitzpatrick","Collin Morikawa","Si Woo Kim","Russell Henley","Harris English","Daniel Berger","Kurt Kitayama","Ryan Gerard","Brian Campbell"]},{"name":"CJ Hassan 2","picks":["Xander Schauffele","Matt Fitzpatrick","Tommy Fleetwood","Viktor Hovland","Akshay Bhatia","Nicolai Højgaard","Gary Woodland","Kurt Kitayama","Nicolas Echavarria","Brian Campbell"]},{"name":"Campbell Morrison","picks":["Bryson DeChambeau","Matt Fitzpatrick","Patrick Reed","Shane Lowry","Justin Thomas","J.J. Spaun","Maverick McNealy","Keegan Bradley","Dustin Johnson","Vijay Singh"]},{"name":"David Van Dyke","picks":["Ludvig Åberg","Matt Fitzpatrick","Min Woo Lee","Jacob Bridgeman","Chris Gotterup","J.J. Spaun","Maverick McNealy","Gary Woodland","Nicolai Højgaard","Danny Willett"]},{"name":"John Zubak 1","picks":["Scottie Scheffler","Patrick Reed","Matt Fitzpatrick","Jason Day","Jacob Bridgeman","Max Homa","Corey Conners","Cameron Smith","Nicolai Højgaard","Mason Howell"]},{"name":"John Zubak 2","picks":["Bryson DeChambeau","Patrick Reed","Matt Fitzpatrick","Jason Day","Tyrrell Hatton","Max Homa","Corey Conners","Cameron Smith","Nicolai Højgaard","Mason Howell"]},{"name":"John Zubak 3","picks":["Xander Schauffele","Patrick Reed","Justin Rose","Jason Day","Jacob Bridgeman","Max Homa","Corey Conners","Sungjae Im","Nicolai Højgaard","Mason Howell"]},{"name":"Keenan Iuliano","picks":["Xander Schauffele","Robert MacIntyre","Brooks Koepka","Chris Gotterup","Adam Scott","Nicolai Højgaard","Rasmus Højgaard","Corey Conners","Gary Woodland","Fifa Laopakdee"]},{"name":"Meghan Cross","picks":["Ludvig Åberg","Tommy Fleetwood","Brooks Koepka","Si Woo Kim","Viktor Hovland","Keegan Bradley","Sungjae Im","Sam Burns","Max Homa","Fifa Laopakdee"]},{"name":"William Wessman","picks":["Scottie Scheffler","Cameron Young","Patrick Reed","Akshay Bhatia","Jason Day","Cameron Smith","Ben Griffin","Corey Conners","J.J. Spaun","Ethan Fang"]},{"name":"Leon Mehring","picks":["Bryson DeChambeau","Tommy Fleetwood","Matt Fitzpatrick","Chris Gotterup","Viktor Hovland","Sam Burns","Corey Conners","Harris English","Ben Griffin","Brian Campbell"]},{"name":"Michael Broucek","picks":["Ludvig Åberg","Robert MacIntyre","Tommy Fleetwood","Si Woo Kim","Jason Day","Corey Conners","Gary Woodland","J.J. Spaun","Aaron Rai","Vijay Singh"]},{"name":"Ryan Aberdale","picks":["Jon Rahm","Matt Fitzpatrick","Cameron Young","Adam Scott","Akshay Bhatia","Corey Conners","Alex Noren","Michael Kim","Zach Johnson","Ethan Fang"]},{"name":"John Kapelewski","picks":["Ludvig Åberg","Matt Fitzpatrick","Tommy Fleetwood","Akshay Bhatia","Viktor Hovland","J.J. Spaun","Cameron Smith","Max Homa","Daniel Berger","Angel Cabrera"]},{"name":"Mark Mitchell 1","picks":["Scottie Scheffler","Tommy Fleetwood","Cameron Young","Jacob Bridgeman","Akshay Bhatia","Cameron Smith","Corey Conners","Sungjae Im","Maverick McNealy","Brian Campbell"]},{"name":"Mark Mitchell 2","picks":["Jon Rahm","Patrick Reed","Collin Morikawa","Viktor Hovland","Russell Henley","J.J. Spaun","Sungjae Im","Ben Griffin","Harris English","Brian Campbell"]},{"name":"Michele Mitchell","picks":["Scottie Scheffler","Cameron Young","Collin Morikawa","Viktor Hovland","Akshay Bhatia","Sam Burns","Cameron Smith","Max Homa","Keegan Bradley","Brian Campbell"]},{"name":"John Ryan","picks":["Ludvig Åberg","Patrick Reed","Robert MacIntyre","Akshay Bhatia","Marco Penge","Nicolai Højgaard","Nicolas Echavarria","Sam Burns","Keegan Bradley","Fifa Laopakdee"]},{"name":"Matt Kelty","picks":["Bryson DeChambeau","Brooks Koepka","Cameron Young","Chris Gotterup","Sepp Straka","Max Homa","Sungjae Im","Nicolai Højgaard","J.J. Spaun","Mason Howell"]},{"name":"Hunter LaFond","picks":["Scottie Scheffler","Robert MacIntyre","Tommy Fleetwood","Viktor Hovland","Russell Henley","Sam Burns","Harris English","Nicolai Højgaard","Keegan Bradley","Fred Couples"]},{"name":"Brook Parker","picks":["Scottie Scheffler","Cameron Young","Tommy Fleetwood","Viktor Hovland","Russell Henley","Sam Burns","Corey Conners","J.J. Spaun","Nicolai Højgaard","Danny Willett"]},{"name":"Tim Canning","picks":["Ludvig Åberg","Cameron Young","Min Woo Lee","Chris Gotterup","Shane Lowry","Harris English","Max Homa","Wyndham Clark","Keegan Bradley","Angel Cabrera"]},{"name":"John Atanasoff","picks":["Bryson DeChambeau","Justin Rose","Robert MacIntyre","Si Woo Kim","Justin Thomas","Sungjae Im","Harris English","Cameron Smith","Ben Griffin","Angel Cabrera"]},{"name":"Sayer Harrison","picks":["Jon Rahm","Matt Fitzpatrick","Brooks Koepka","Chris Gotterup","Sepp Straka","Sungjae Im","Nicolai Højgaard","Max Homa","Wyndham Clark","Ethan Fang"]},{"name":"Henry Cohen","picks":["Xander Schauffele","Justin Rose","Cameron Young","Chris Gotterup","Russell Henley","Corey Conners","Harris English","Ben Griffin","Nicolai Højgaard","Mason Howell"]},{"name":"Evan Pockette","picks":["Scottie Scheffler","Tommy Fleetwood","Hideki Matsuyama","Chris Gotterup","Shane Lowry","Matt McCarty","Max Homa","Nicolai Højgaard","Sam Burns","Danny Willett"]},{"name":"Will Fernandez 1","picks":["Rory McIlroy","Matt Fitzpatrick","Jordan Spieth","Adam Scott","Justin Thomas","Harris English","Dustin Johnson","Max Homa","Charl Schwartzel","Danny Willett"]},{"name":"Will Fernandez 2","picks":["Bryson DeChambeau","Cameron Young","Tommy Fleetwood","Shane Lowry","Si Woo Kim","Sam Burns","Ben Griffin","J.J. Spaun","Daniel Berger","Jackson Herrington"]},{"name":"Simon Foster","picks":["Ludvig Åberg","Tommy Fleetwood","Robert MacIntyre","Tyrrell Hatton","Viktor Hovland","J.J. Spaun","Cameron Smith","Aaron Rai","Harry Hall","Fred Couples"]},{"name":"Brad Cohen 1","picks":["Jon Rahm","Tommy Fleetwood","Patrick Reed","Sepp Straka","Tyrrell Hatton","Sam Burns","Daniel Berger","Harry Hall","Maverick McNealy","Ethan Fang"]},{"name":"Brad Cohen 2","picks":["Bryson DeChambeau","Patrick Reed","Robert MacIntyre","Chris Gotterup","Akshay Bhatia","Sam Burns","Michael Brennan","Carlos Ortiz","Corey Conners","Angel Cabrera"]},{"name":"Brad Cohen 3","picks":["Xander Schauffele","Min Woo Lee","Brooks Koepka","Jason Day","Marco Penge","Harris English","Nicolai Højgaard","Aaron Rai","Wyndham Clark","Brian Campbell"]},{"name":"Charlie Cohen","picks":["Scottie Scheffler","Collin Morikawa","Cameron Young","Viktor Hovland","Akshay Bhatia","Andrew Novak","Sam Burns","Dustin Johnson","Cameron Smith","Fifa Laopakdee"]},{"name":"Adam Maietta","picks":["Scottie Scheffler","Cameron Young","Hideki Matsuyama","Justin Thomas","Jacob Bridgeman","Corey Conners","J.J. Spaun","Nicolai Højgaard","Maverick McNealy","Mike Weir"]},{"name":"Tim Weeks","picks":["Bryson DeChambeau","Cameron Young","Tommy Fleetwood","Si Woo Kim","Shane Lowry","Corey Conners","Nicolai Højgaard","Harris English","Sungjae Im","Danny Willett"]},{"name":"Elliott Ludy","picks":["Bryson DeChambeau","Cameron Young","Tommy Fleetwood","Akshay Bhatia","Justin Thomas","J.J. Spaun","Gary Woodland","Dustin Johnson","Daniel Berger","Fifa Laopakdee"]},{"name":"Rick Smeriglio 1","picks":["Xander Schauffele","Tommy Fleetwood","Justin Rose","Viktor Hovland","Justin Thomas","Harris English","J.J. Spaun","Cameron Smith","Max Homa","Angel Cabrera"]},{"name":"Rick Smeriglio 2","picks":["Jon Rahm","Matt Fitzpatrick","Cameron Young","Shane Lowry","Akshay Bhatia","Sam Burns","Gary Woodland","Kurt Kitayama","Brian Harman","Vijay Singh"]},{"name":"Nicki Green","picks":["Xander Schauffele","Collin Morikawa","Min Woo Lee","Viktor Hovland","Adam Scott","Corey Conners","Max Homa","Max Greyserman","Sungjae Im","Mason Howell"]},{"name":"Don Green","picks":["Scottie Scheffler","Matt Fitzpatrick","Hideki Matsuyama","Si Woo Kim","Justin Thomas","Sam Burns","J.J. Spaun","Cameron Smith","Gary Woodland","Jackson Herrington"]},{"name":"Josh Greiner","picks":["Jon Rahm","Patrick Reed","Min Woo Lee","Shane Lowry","Sepp Straka","Cameron Smith","Max Homa","Corey Conners","Harry Hall","Vijay Singh"]},{"name":"Teddy Ankeny","picks":["Rory McIlroy","Brooks Koepka","Cameron Young","Viktor Hovland","Justin Thomas","Max Homa","Dustin Johnson","Sam Burns","Sergio Garcia","Fred Couples"]},{"name":"Chris Walsh","picks":["Rory McIlroy","Cameron Young","Justin Rose","Si Woo Kim","Jason Day","Sungjae Im","Sam Burns","Harris English","Nicolai Højgaard","Mason Howell"]},{"name":"Vicki Mehring","picks":["Scottie Scheffler","Tommy Fleetwood","Justin Rose","Viktor Hovland","Justin Thomas","Wyndham Clark","Gary Woodland","Max Homa","Brian Harman","Vijay Singh"]},{"name":"Eddie Murphy","picks":["Scottie Scheffler","Cameron Young","Brooks Koepka","Viktor Hovland","Chris Gotterup","Gary Woodland","Nicolai Højgaard","Rasmus Højgaard","Maverick McNealy","Mason Howell"]},{"name":"Tyler Mulberry 1","picks":["Scottie Scheffler","Cameron Young","Hideki Matsuyama","Si Woo Kim","Jake Knapp","Harris English","Corey Conners","Maverick McNealy","Max Homa","Ethan Fang"]},{"name":"Tyler Mulberry 2","picks":["Jon Rahm","Cameron Young","Min Woo Lee","Akshay Bhatia","Adam Scott","Corey Conners","Harris English","Maverick McNealy","J.J. Spaun","Ethan Fang"]},{"name":"John Doyle","picks":["Scottie Scheffler","Matt Fitzpatrick","Tommy Fleetwood","Russell Henley","Patrick Cantlay","Maverick McNealy","Nicolai Højgaard","J.J. Spaun","Harris English","Danny Willett"]},{"name":"Matt Treveloni","picks":["Scottie Scheffler","Tommy Fleetwood","Justin Rose","Shane Lowry","Jason Day","Ben Griffin","Cameron Smith","Keegan Bradley","Daniel Berger","Jose Maria Olazabal"]},{"name":"Kyle Douglas","picks":["Jon Rahm","Matt Fitzpatrick","Cameron Young","Chris Gotterup","Akshay Bhatia","Corey Conners","Nicolai Højgaard","Maverick McNealy","Ben Griffin","Mason Howell"]},{"name":"Blake Egan","picks":["Scottie Scheffler","Cameron Young","Matt Fitzpatrick","Jake Knapp","Justin Thomas","Sungjae Im","Corey Conners","Harris English","Max Homa","Brian Campbell"]},{"name":"Gabe Strand","picks":["Jon Rahm","Matt Fitzpatrick","Tommy Fleetwood","Jacob Bridgeman","Chris Gotterup","Maverick McNealy","Cameron Smith","Ben Griffin","J.J. Spaun","Vijay Singh"]},{"name":"Andrew Quinn 1","picks":["Scottie Scheffler","Tommy Fleetwood","Cameron Young","Russell Henley","Viktor Hovland","Corey Conners","Harris English","Nicolai Højgaard","Maverick McNealy","Danny Willett"]},{"name":"Andrew Quinn 2","picks":["Ludvig Åberg","Tommy Fleetwood","Cameron Young","Russell Henley","Viktor Hovland","Corey Conners","Harris English","Nicolai Højgaard","Maverick McNealy","Danny Willett"]},{"name":"Andrew Quinn 3","picks":["Xander Schauffele","Tommy Fleetwood","Cameron Young","Russell Henley","Viktor Hovland","Corey Conners","Harris English","Nicolai Højgaard","Maverick McNealy","Danny Willett"]},{"name":"Morgan Dewdney","picks":["Xander Schauffele","Matt Fitzpatrick","Cameron Young","Russell Henley","Adam Scott","Harris English","Corey Conners","Nicolai Højgaard","Maverick McNealy","Brian Campbell"]},{"name":"Hunter Westerberg","picks":["Bryson DeChambeau","Justin Rose","Tommy Fleetwood","Patrick Cantlay","Shane Lowry","Corey Conners","Wyndham Clark","Max Homa","Ben Griffin","Mason Howell"]},{"name":"Kathleen Conway","picks":["Scottie Scheffler","Justin Rose","Jordan Spieth","Chris Gotterup","Russell Henley","Corey Conners","Brian Harman","Kurt Kitayama","Ben Griffin","Mason Howell"]},{"name":"Kathleen Conway & Mikey B","picks":["Xander Schauffele","Collin Morikawa","Hideki Matsuyama","Viktor Hovland","Patrick Cantlay","Sungjae Im","Corey Conners","Harris English","Nicolai Højgaard","Danny Willett"]},{"name":"Andrew Danvers","picks":["Jon Rahm","Tommy Fleetwood","Cameron Young","Viktor Hovland","Si Woo Kim","Nicolai Højgaard","Rasmus Højgaard","Sungjae Im","Max Homa","Vijay Singh"]},{"name":"Jamie Church","picks":["Ludvig Åberg","Tommy Fleetwood","Min Woo Lee","Shane Lowry","Akshay Bhatia","Harris English","Max Homa","Wyndham Clark","Keegan Bradley","Brandon Holtz"]},{"name":"Nick Boardman 1","picks":["Ludvig Åberg","Tommy Fleetwood","Cameron Young","Justin Thomas","Jake Knapp","Sam Burns","Harris English","Daniel Berger","Cameron Smith","Brian Campbell"]},{"name":"Nick Boardman 2","picks":["Scottie Scheffler","Cameron Young","Hideki Matsuyama","Jason Day","Tyrrell Hatton","Sungjae Im","Corey Conners","Maverick McNealy","Nicolai Højgaard","Danny Willett"]},{"name":"Jean Mitchell","picks":["Ludvig Åberg","Cameron Young","Collin Morikawa","Si Woo Kim","Viktor Hovland","Max Homa","Daniel Berger","J.J. Spaun","Cameron Smith","Ethan Fang"]},{"name":"Mackenzie Ward","picks":["Scottie Scheffler","Brooks Koepka","Matt Fitzpatrick","Justin Thomas","Shane Lowry","Max Homa","Corey Conners","Maverick McNealy","Keegan Bradley","Brandon Holtz"]},{"name":"Alex Steel","picks":["Scottie Scheffler","Tommy Fleetwood","Robert MacIntyre","Justin Thomas","Shane Lowry","Harris English","Max Homa","Gary Woodland","Ben Griffin","Vijay Singh"]},{"name":"Cate Ellison","picks":["Scottie Scheffler","Colin Morikawa","Brooks Koepka","Viktor Hovland","Justin Thomas","Wyndham Clark","Corey Conners","Max Homa","Sungjae Im","Danny Willet"]},{"name":"Jacob Eichenbaum","picks":["Scottie Scheffler","Cameron Young","Jordan Spieth","Chris Gotterup","Jacob Bridgeman","Harris English","Aaron Rai","J.J. Spaun","Sami Valimaki","Naoyuki Kataoka"]},{"name":"Zach Hitchner","picks":["Scottie Scheffler","Tommy Fleetwood","Jordan Spieth","Shane Lowry","Justin Thomas","J.J. Spaun","Maverick McNealy","Tom McKibbin","Michael Brennan","Angel Cabrera"]},{"name":"Bill Ward","picks":["Xander Schauffele","Patrick Reed","Cameron Young","Chris Gotterup","Patrick Cantlay","Harris English","Corey Conners","Nicolai Højgaard","Sungjae Im","Angel Cabrera"]},{"name":"Brooks Parker","picks":["Scottie Scheffler","Justin Rose","Brooks Koepka","Chris Gotterup","Justin Thomas","J.J. Spaun","Max Homa","Ben Griffin","Cameron Smith","Mason Howell"]},{"name":"Amy Mitchell","picks":["Rory McIlroy","Justin Rose","Collin Morikawa","Si Woo Kim","Adam Scott","Rasmus Højgaard","Harry Hall","Max Homa","Cameron Smith","Brian Campbell"]},{"name":"Jared Snyder","picks":["Bryson DeChambeau","Matt Fitzpatrick","Tommy Fleetwood","Chris Gotterup","Sepp Straka","Wyndham Clark","Dustin Johnson","Sam Burns","Gary Woodland","Danny Willett"]},{"name":"Parker Ward","picks":["Bryson DeChambeau","Matt Fitzpatrick","Collin Morikawa","Chris Gotterup","Jacob Bridgeman","Nicolai Højgaard","Sungjae Im","Corey Conners","Kurt Kitayama","Brian Campbell"]},{"name":"Jackson Ward","picks":["Bryson DeChambeau","Cameron Young","Collin Morikawa","Akshay Bhatia","Chris Gotterup","Daniel Berger","Cameron Smith","Ben Griffin","Corey Conners","Vijay Singh"]},{"name":"Brian Boatman","picks":["Ludvig Åberg","Cameron Young","Robert MacIntyre","Si Woo Kim","Sepp Straka","Keegan Bradley","Daniel Berger","Cameron Smith","J.J. Spaun","Brian Campbell"]},{"name":"Will Cohen 1","picks":["Bryson DeChambeau","Robert MacIntyre","Cameron Young","Si Woo Kim","Justin Thomas","Corey Conners","Cameron Smith","Max Homa","Nicolai Højgaard","Danny Willett"]},{"name":"Will Cohen 2","picks":["Ludvig Åberg","Jordan Spieth","Min Woo Lee","Jason Day","Jacob Bridgeman","Sungjae Im","Daniel Berger","Sam Stevens","Ben Griffin","Danny Willett"]},{"name":"Henry Woodworth","picks":["Ludvig Åberg","Matt Fitzpatrick","Tommy Fleetwood","Akshay Bhatia","Jake Knapp","Sungjae Im","Corey Conners","Nicolai Højgaard","Gary Woodland","Vijay Singh"]}],"all_golfers":["Aaron Rai","Adam Scott","Akshay Bhatia","Alex Noren","Andrew Novak","Angel Cabrera","Ben Griffin","Brandon Holtz","Brian Campbell","Brian Harman","Brooks Koepka","Bryson DeChambeau","Bubba Watson","Cameron Smith","Cameron Young","Carlos Ortiz","Charl Schwartzel","Chris Gotterup","Colin Morikawa","Collin Morikawa","Corey Conners","Daniel Berger","Danny Willet","Danny Willett","Dustin Johnson","Ethan Fang","Fifa Laopakdee","Fred Couples","Gary Woodland","Harris English","Harry Hall","Hideki Matsuyama","J.J. Spaun","Jackson Herrington","Jacob Bridgeman","Jake Knapp","Jason Day","Jon Rahm","Jordan Spieth","Jose Maria Olazabal","Justin Rose","Justin Thomas","Keegan Bradley","Kurt Kitayama","Ludvig Åberg","Marco Penge","Mason Howell","Matt Fitzpatrick","Matt McCarty","Maverick McNealy","Max Greyserman","Max Homa","Michael Brennan","Michael Kim","Mike Weir","Min Woo Lee","Naoyuki Kataoka","Nicolai Højgaard","Nicolas Echavarria","Patrick Cantlay","Patrick Reed","Rasmus Højgaard","Robert MacIntyre","Rory McIlroy","Russell Henley","Ryan Fox","Ryan Gerard","Sam Burns","Sam Stevens","Sami Valimaki","Scottie Scheffler","Sepp Straka","Sergio Garcia","Shane Lowry","Si Woo Kim","Sungjae Im","Tom McKibbin","Tommy Fleetwood","Tyrrell Hatton","Vijay Singh","Viktor Hovland","Wyndham Clark","Xander Schauffele","Zach Johnson"]};
+
+// Normalize golfer names (handle Collin/Colin Morikawa, Danny Willet/Willett)
+const NAME_ALIASES = {
+  "Colin Morikawa": "Collin Morikawa",
+  "Danny Willet": "Danny Willett",
+};
+
+function normalizeName(n) {
+  return NAME_ALIASES[n] || n;
+}
+
+let SCORES = {}; // name -> {score, thru, pos, status} status: active|cut|wd
+let WORST_SCORE = 999;
+let lastFetchTime = null;
+let allMastersPlayers = [];
+
+// Format score for display
+function fmtScore(s) {
+  if (s === null || s === undefined || s === 999) return 'N/A';
+  if (s === 0) return 'E';
+  return s > 0 ? '+' + s : '' + s;
+}
+
+function scoreClass(s) {
+  if (s === null || s === undefined || s === 999) return '';
+  if (s === 0) return 'score-e';
+  return s > 0 ? 'score-pos' : 'score-neg';
+}
+
+// Google Apps Script proxy -- fetches ESPN Masters scores server-side, no CORS issues
+const PROXY_URL = 'https://script.google.com/macros/s/AKfycbyXz0_s0cEpTL1U-4Xy2WgTWW_MXpaSdn0Wni4l3eGi6TcrvUsp8Qjl0DOOtcQgEA64/exec';
+
+async function fetchScores() {
+  try {
+    const res = await fetch(PROXY_URL, { cache: 'no-cache' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    if (!text || text.trim().startsWith('<')) throw new Error('Got HTML instead of JSON');
+    const data = JSON.parse(text);
+    const result = parseESPNData(data);
+    if (result) return result;
+    throw new Error('parseESPNData returned null');
+  } catch(e) {
+    console.warn('Proxy fetch failed:', e);
+    return null;
+  }
+}
+function parseESPNData(data) {
+  const result = {};
+  const players = [];
+  try {
+    let worst = -40;
+    // ESPN scoreboard: events[0].competitions[0].competitors
+    const events = data.events || [];
+    if (!events.length) return null;
+    const comps = events[0].competitions || [];
+    if (!comps.length) return null;
+    const competitors = comps[0].competitors || [];
+    if (!competitors.length) return null;
+
+    competitors.forEach(p => {
+      const name = (p.athlete?.displayName || '').trim();
+      if (!name) return;
+
+      // Score to par — ESPN returns it as a string like "-5", "E", "+2"
+      const linescores = p.linescores || [];
+      let scoreStr = p.score || 'E';
+      // Try to get total to par from statistics
+      const toparStat = (p.statistics || []).find(s => s.name === 'scoreToPar' || s.name === 'topar' || s.abbreviation === 'TOT');
+      if (toparStat) scoreStr = toparStat.displayValue || toparStat.value || scoreStr;
+
+      let score = scoreStr === 'E' ? 0 : (scoreStr === '--' ? 0 : parseInt(scoreStr) || 0);
+
+      const statusDesc = (p.status?.type?.description || '').toLowerCase();
+      const statusName = (p.status?.type?.name || '').toLowerCase();
+      const isCut = statusDesc.includes('cut') || statusName.includes('cut');
+      const isWD = statusDesc.includes('withdrew') || statusDesc.includes('wd') || statusName.includes('wd');
+
+      const pos = p.status?.position?.displayName || p.status?.displayValue || '--';
+      const thru = p.status?.thru != null ? (p.status.thru === 0 ? 'F' : p.status.thru) : '--';
+
+      if (!isCut && !isWD && score > worst) worst = score;
+      result[name] = { score, thru, pos, status: isCut ? 'cut' : isWD ? 'wd' : 'active' };
+      players.push({ name, score, thru, pos, status: isCut ? 'cut' : isWD ? 'wd' : 'active' });
+    });
+
+    if (!players.length) return null;
+    WORST_SCORE = worst + 8;
+    return { scores: result, players };
+  } catch(e) {
+    console.error('parseESPNData error:', e);
+    return null;
+  }
+}
+
+function getGolferScore(name) {
+  const normalized = normalizeName(name);
+  const data = SCORES[name] || SCORES[normalized];
+  if (!data) return { score: 0, thru: '--', pos: '--', status: 'active', found: false };
+  if (data.status === 'cut' || data.status === 'wd') {
+    return { ...data, score: WORST_SCORE, found: true };
+  }
+  return { ...data, found: true };
+}
+
+// Calculate entrant score: top 4, tiebreakers from 5th onward
+function calcEntrantScore(picks) {
+  const picksWithScores = picks.map((name, i) => {
+    const g = getGolferScore(name);
+    return { name, pickNum: i+1, ...g };
+  });
+  // Sort by score ascending (lower = better)
+  const sorted = [...picksWithScores].sort((a,b) => a.score - b.score);
+  // Top 4
+  const counting = sorted.slice(0, 4);
+  const notCounting = sorted.slice(4);
+  const total = counting.reduce((s, g) => s + g.score, 0);
+  return { total, counting, notCounting, allPicks: picksWithScores };
+}
+
+// Build pool standings
+function buildPoolStandings() {
+  return POOL_DATA.entrants.map(e => {
+    const { total, counting, notCounting, allPicks } = calcEntrantScore(e.picks.map(normalizeName));
+    return { name: e.name, total, counting, notCounting, allPicks, picks: e.picks };
+  }).sort((a, b) => {
+    if (a.total !== b.total) return a.total - b.total;
+    // Tiebreaker: compare 5th, 6th, 7th, etc. from sorted order
+    const aExtra = [...a.counting, ...a.notCounting];
+    const bExtra = [...b.counting, ...b.notCounting];
+    for (let i = 4; i < 10; i++) {
+      const as = aExtra[i]?.score ?? 999;
+      const bs = bExtra[i]?.score ?? 999;
+      if (as !== bs) return as - bs;
+    }
+    return a.name.localeCompare(b.name);
+  });
+}
+
+function renderPoolTable(standings) {
+  const tbody = document.getElementById('poolBody');
+  const badge = document.getElementById('poolCountBadge');
+  badge.textContent = standings.length + ' entrants';
+
+  if (!standings.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="loading-msg">No results found.</td></tr>';
+    return;
+  }
+
+  let pos = 1;
+  let rows = '';
+  for (let i = 0; i < standings.length; i++) {
+    const e = standings[i];
+    const isTied = (i > 0 && standings[i-1].total === e.total) || (i < standings.length-1 && standings[i+1].total === e.total);
+    const dispPos = isTied ? 'T' + pos : '' + pos;
+
+    let posHTML;
+    if (pos === 1 && !isTied) posHTML = `<span class="pos-medal medal-1">1</span>`;
+    else if (pos === 2 && !isTied) posHTML = `<span class="pos-medal medal-2">2</span>`;
+    else if (pos === 3 && !isTied) posHTML = `<span class="pos-medal medal-3">3</span>`;
+    else posHTML = dispPos;
+
+    const scoreDisp = fmtScore(e.total);
+    const sCls = scoreClass(e.total);
+    const topClass = pos <= 3 && !isTied ? ' top3' : '';
+
+    // Counting golfers tags
+    const countTags = e.counting.map(g => {
+      const sc = g.status === 'cut' ? ' golfer-cut' : g.status === 'wd' ? ' golfer-wd' : ' golfer-counting';
+      return `<span class="golfer-tag${sc}">${g.name} <strong>${fmtScore(g.score)}</strong></span>`;
+    }).join('');
+
+    rows += `<tr class="${topClass}" onclick="openModal(${i})" style="cursor:pointer;">
+      <td class="pos-cell">${posHTML}</td>
+      <td><span class="entrant-name">${e.name}</span></td>
+      <td class="right"><span class="score-total ${sCls}">${scoreDisp}</span></td>
+      <td class="picks-col">${countTags}</td>
+    </tr>`;
+
+    if (i+1 < standings.length && standings[i+1].total !== e.total) pos = i+2;
+    else if (i === 0) pos = 1;
+  }
+  tbody.innerHTML = rows;
+  window._standings = standings;
+}
+
+let _allStandings = [];
+
+function filterPool() {
+  const q = document.getElementById('poolSearch').value.toLowerCase();
+  const filtered = _allStandings.filter(e => e.name.toLowerCase().includes(q));
+  renderPoolTable(filtered);
+}
+
+// PICKS TAB
+function renderPicksGrid(standings) {
+  const container = document.getElementById('picksGrid');
+  const q = document.getElementById('picksSearch').value.toLowerCase();
+  const filtered = standings.filter(e => e.name.toLowerCase().includes(q));
+
+  if (!filtered.length) { container.innerHTML = '<div class="loading-msg">No entrants found.</div>'; return; }
+
+  container.style.display = 'grid';
+  container.style.gridTemplateColumns = 'repeat(auto-fill, minmax(300px, 1fr))';
+  container.style.gap = '0.75rem';
+
+  container.innerHTML = filtered.map((e, idx) => {
+    const scoreDisp = fmtScore(e.total);
+    const sCls = scoreClass(e.total);
+    const pickRows = e.allPicks.map((g, i) => {
+      const isCounting = e.counting.some(c => c.name === g.name);
+      const cutClass = g.status === 'cut' ? ' golfer-cut' : g.status === 'wd' ? ' golfer-wd' : '';
+      const badge = isCounting ? `<span style="font-size:9px;background:var(--gold);color:var(--green-dark);padding:1px 5px;border-radius:6px;font-weight:700;margin-left:4px;">★</span>` : '';
+      return `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid var(--border-light);font-size:12.5px;">
+        <span style="color:var(--text-muted);font-size:11px;min-width:48px;">Pick ${i+1}</span>
+        <span class="${cutClass}" style="flex:1;">${g.name}${badge}</span>
+        <span style="font-weight:600;${g.status==='cut'||g.status==='wd'?'color:var(--wd);':''}">${fmtScore(g.score)}</span>
+      </div>`;
+    }).join('');
+
+    const realIdx = _allStandings.indexOf(e);
+    return `<div style="background:var(--white);border:1px solid var(--border-light);border-radius:8px;overflow:hidden;cursor:pointer;" onclick="openModal(${realIdx})">
+      <div style="background:var(--green-dark);color:var(--cream);padding:0.6rem 0.9rem;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-weight:500;font-size:14px;">${e.name}</span>
+        <span style="font-size:16px;font-weight:700;color:var(--gold);">${scoreDisp}</span>
+      </div>
+      <div style="padding:0.6rem 0.9rem;">${pickRows}</div>
+    </div>`;
+  }).join('');
+}
+
+function filterPicks() {
+  renderPicksGrid(_allStandings);
+}
+
+// MASTERS LEADERBOARD TAB
+function renderMastersLB(players) {
+  const container = document.getElementById('mastersLB');
+  const q = document.getElementById('mastersSearch').value.toLowerCase();
+  const filtered = players.filter(p => p.name.toLowerCase().includes(q));
+
+  if (!filtered.length) { container.innerHTML = '<div class="loading-msg">No golfers found.</div>'; return; }
+
+  // Sort by score
+  const sorted = [...filtered].sort((a,b) => {
+    if (a.status !== 'active' && b.status === 'active') return 1;
+    if (a.status === 'active' && b.status !== 'active') return -1;
+    return a.score - b.score;
+  });
+
+  let html = '<div class="masters-grid">';
+  let cutShown = false;
+  sorted.forEach((p, i) => {
+    if (!cutShown && p.status !== 'active') {
+      html += `</div><div class="cut-label">— Cut / Withdrawn —</div><div class="masters-grid">`;
+      cutShown = true;
+    }
+    const sc = scoreClass(p.score);
+    const inPool = Object.values(POOL_DATA.entrants).some(e => e.picks.map(normalizeName).includes(normalizeName(p.name)));
+    html += `<div class="golfer-card${p.status==='cut'?' golfer-cut':p.status==='wd'?' golfer-wd':''}">
+      <span class="gc-pos">${p.pos || '--'}</span>
+      <span class="gc-name">${p.name}${inPool?`<span style="font-size:10px;color:var(--gold);margin-left:4px;">★</span>`:''}</span>
+      <span class="gc-score ${sc}">${fmtScore(p.score)}</span>
+      <span class="gc-thru">${p.thru || '--'}</span>
+    </div>`;
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function filterMasters() {
+  renderMastersLB(allMastersPlayers);
+}
+
+// MODAL
+function openModal(idx) {
+  const e = _allStandings[idx];
+  if (!e) return;
+  document.getElementById('modalName').textContent = e.name;
+  document.getElementById('modalScore').textContent = fmtScore(e.total);
+  document.getElementById('modalTotal').textContent = fmtScore(e.total);
+  document.getElementById('modalTotal').className = 'modal-total-score ' + scoreClass(e.total);
+
+  const pickRows = e.allPicks.map((g, i) => {
+    const isCounting = e.counting.some(c => c.name === g.name);
+    const badge = isCounting ? `<span class="pick-counting-badge">COUNTS</span>` : '';
+    const statusLabel = g.status === 'cut' ? `<span class="pick-status-cut">CUT</span>` : g.status === 'wd' ? `<span class="pick-status-wd">WD</span>` : '';
+    const nameStyle = g.status === 'cut' || g.status === 'wd' ? 'text-decoration:line-through;color:var(--text-muted);' : '';
+    const sc = scoreClass(g.score);
+    return `<div class="pick-row">
+      <span class="pick-num">Pick ${i+1}</span>
+      <span class="pick-name" style="${nameStyle}">${g.name}${badge}${statusLabel}</span>
+      <span class="pick-thru">${g.thru || '--'}</span>
+      <span class="pick-score ${sc}">${fmtScore(g.score)}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('modalPicks').innerHTML = pickRows;
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+}
+function closeModalOutside(e) {
+  if (e.target === document.getElementById('modal')) closeModal();
+}
+
+// TABS
+function showTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+  if (id === 'picks') renderPicksGrid(_allStandings);
+  if (id === 'masters') renderMastersLB(allMastersPlayers);
+}
+
+// MAIN FETCH & RENDER
+async function fetchAndRender() {
+  const dot = document.getElementById('statusDot');
+  const statusTxt = document.getElementById('statusText');
+  const lastUpd = document.getElementById('lastUpdated');
+
+  dot.classList.remove('live');
+  statusTxt.textContent = 'Fetching live scores...';
+
+  const result = await fetchScores();
+
+  if (result) {
+    SCORES = result.scores;
+    allMastersPlayers = result.players;
+    dot.classList.add('live');
+    statusTxt.textContent = `Live scores loaded — ${allMastersPlayers.filter(p=>p.status==='active').length} golfers active`;
+    lastFetchTime = new Date();
+    lastUpd.textContent = 'Last updated: ' + lastFetchTime.toLocaleTimeString();
+  } else {
+    // Demo mode with simulated scores for testing
+    dot.style.background = '#f39c12';
+    statusTxt.textContent = 'Could not reach Masters API — using demo scores. Refresh to retry.';
+    lastUpd.textContent = 'Demo mode (no live data)';
+    SCORES = buildDemoScores();
+    allMastersPlayers = Object.entries(SCORES).map(([name, d]) => ({ name, ...d }));
+    WORST_SCORE = 20;
+  }
+
+  _allStandings = buildPoolStandings();
+  renderPoolTable(_allStandings);
+
+  const activeTab = document.querySelector('.tab-panel.active');
+  if (activeTab && activeTab.id === 'picks') renderPicksGrid(_allStandings);
+  if (activeTab && activeTab.id === 'masters') renderMastersLB(allMastersPlayers);
+}
+
+function buildDemoScores() {
+  // Demo scores for testing UI before tournament starts
+  const allNames = [...new Set(POOL_DATA.entrants.flatMap(e => e.picks.map(normalizeName)))];
+  const scores = {};
+  const seed = [
+    ["Rory McIlroy",-12],["Scottie Scheffler",-10],["Ludvig Åberg",-9],["Tommy Fleetwood",-8],
+    ["Bryson DeChambeau",-7],["Xander Schauffele",-7],["Cameron Young",-6],["Jon Rahm",-5],
+    ["Collin Morikawa",-5],["Matt Fitzpatrick",-4],["Viktor Hovland",-3],["Akshay Bhatia",-3],
+    ["Brooks Koepka",-2],["Justin Rose",-2],["Shane Lowry",-1],["Si Woo Kim",-1],
+    ["Min Woo Lee",0],["Tommy Fleetwood",0],["Chris Gotterup",0],["Patrick Reed",1],
+    ["Jordan Spieth",1],["Justin Thomas",2],["Cameron Smith",2],["Hideki Matsuyama",3],
+    ["Robert MacIntyre",3],["Tyrrell Hatton",4],["Harris English",4],["Corey Conners",5],
+    ["Max Homa",5],["Sam Burns",6],["Nicolai Højgaard",6],["Jacob Bridgeman",7],
+    ["J.J. Spaun",7],["Daniel Berger",8],["Sepp Straka",8],["Russell Henley",9],
+    ["Adam Scott",9],["Jason Day",10],["Keegan Bradley",10],["Sungjae Im",11],
+  ];
+  seed.forEach(([n, s]) => scores[n] = { score: s, thru: 'F', pos: '--', status: 'active' });
+  allNames.forEach(n => {
+    if (!scores[n]) scores[n] = { score: 15, thru: 'CUT', pos: 'CUT', status: 'cut' };
+  });
+  return scores;
+}
+
+// Init
+fetchAndRender();
+// Auto-refresh every 5 minutes
+setInterval(fetchAndRender, 5 * 60 * 1000);
+</script>
+</body>
+</html>
